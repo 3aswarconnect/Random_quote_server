@@ -1,31 +1,30 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const cors=require('cors')
+const cors = require('cors');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware to parse JSON
+// Middleware
 app.use(express.json());
 app.use(cors());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-// Quote model
+// Define Quote schema
 const QuoteSchema = new mongoose.Schema({
   id: Number,
   quote: String,
   author: String,
 });
 
+// Create Quote model
 const Quote = mongoose.model('Quote', QuoteSchema);
 
 // Routes
@@ -34,10 +33,12 @@ app.get('/quotes', async (req, res) => {
     const quotes = await Quote.find();
     res.json({ quotes });
   } catch (error) {
+    console.error('Error fetching quotes:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
